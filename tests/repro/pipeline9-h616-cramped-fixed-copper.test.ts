@@ -76,8 +76,10 @@ test("shows H616 routing-graph crossings beside completed DDR data copper", asyn
   const nodeMap = new Map(
     solver.capacityNodes!.map((node) => [node.capacityMeshNodeId, node]),
   )
-  const unsafePorts = solver.sharedEdgeSegmentsWithNecessaryCrampedPortPoints!
-    // The captured shorted path traverses the sliver's left and right edges.
+  const retainedSegments =
+    solver.sharedEdgeSegmentsWithNecessaryCrampedPortPoints!
+  // The captured shorted path traverses the sliver's left and right edges.
+  const unsafePorts = retainedSegments
     .filter((segment) => Math.abs(segment.start.x - segment.end.x) < 1e-8)
     .flatMap((segment) => segment.portPoints)
     .filter(
@@ -139,14 +141,16 @@ test("shows H616 routing-graph crossings beside completed DDR data copper", asyn
           y:
             (start.y +
               ((end.y - start.y) * (leftX - start.x)) / (end.x - start.x) -
-              roi.minY) * scale,
+              roi.minY) *
+            scale,
         },
         {
           x: 20 + (rightX - roi.minX) * scale,
           y:
             (start.y +
               ((end.y - start.y) * (rightX - start.x)) / (end.x - start.x) -
-              roi.minY) * scale,
+              roi.minY) *
+            scale,
         },
       ],
       strokeWidth: start.width * scale,
