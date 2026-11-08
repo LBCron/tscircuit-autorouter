@@ -404,6 +404,7 @@ export class AutoroutingPipelineSolver9_PreloadedTraceGraph extends BaseSolver {
           {
             layerCount: cms.srj.layerCount,
             allowBlindAndBuriedVias: cms.srj.allowBlindAndBuriedVias,
+            allowViaInPad: cms.srj.allowViaInPad,
             nodeGroups: [
               {
                 groupId: "global",

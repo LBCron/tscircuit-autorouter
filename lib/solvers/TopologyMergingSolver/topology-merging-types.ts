@@ -14,6 +14,7 @@ export interface TopologyMergingSolverParams {
   nodeGroups: readonly TopologyMergingNodeGroup[]
   layerCount: number
   allowBlindAndBuriedVias?: boolean
+  allowViaInPad?: boolean
 }
 
 export type PreparedTopologyMergingNode = {

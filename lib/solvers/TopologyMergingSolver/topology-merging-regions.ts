@@ -66,11 +66,13 @@ export function getLayerTopologiesForCoveredNodes({
   nodeGroups,
   layerCount,
   allowBlindAndBuriedVias = false,
+  allowViaInPad,
 }: {
   coveringNodes: PreparedTopologyMergingNode[]
   nodeGroups: readonly TopologyMergingNodeGroup[]
   layerCount: number
   allowBlindAndBuriedVias?: boolean
+  allowViaInPad?: boolean
 }): {
   layerTopologies: TopologyMergingLayerTopology[]
   overruledTargetSourceKeys: string[]
@@ -80,6 +82,20 @@ export function getLayerTopologiesForCoveredNodes({
     TopologyMergingLayerTopology
   >()
   const overruledTargetSourceKeys = new Set<string>()
+  // Join clear through-via columns only for an explicit no-via-in-pad policy.
+  // Blocked columns retain their original source-key topology and ownership.
+  const mergeClearThroughViaColumns =
+    allowViaInPad === false && !allowBlindAndBuriedVias
+  const isThroughViaBlocked =
+    mergeClearThroughViaColumns &&
+    (coveringNodes.some(
+      ({ node }) =>
+        node._containsObstacle ||
+        node._containsTarget ||
+        node._isVirtualOffboard,
+    ) ||
+      new Set(coveringNodes.flatMap(({ node }) => node.availableZ)).size <
+        layerCount)
   let previousFreeLayer = -2
   let freeRunStart = 0
   for (let z = 0; z < layerCount; z++) {
@@ -121,14 +137,16 @@ export function getLayerTopologiesForCoveredNodes({
         }
       }
     }
+    const isFreeLayer = nodesOnLayer.every(
+      ({ node }) =>
+        !node._containsObstacle &&
+        !node._containsTarget &&
+        !node._isVirtualOffboard,
+    )
     const isFreeSpace =
-      allowBlindAndBuriedVias &&
-      nodesOnLayer.every(
-        ({ node }) =>
-          !node._containsObstacle &&
-          !node._containsTarget &&
-          !node._isVirtualOffboard,
-      )
+      (allowBlindAndBuriedVias || mergeClearThroughViaColumns) &&
+      !isThroughViaBlocked &&
+      isFreeLayer
     if (isFreeSpace) {
       if (z !== previousFreeLayer + 1) freeRunStart = z
       previousFreeLayer = z
