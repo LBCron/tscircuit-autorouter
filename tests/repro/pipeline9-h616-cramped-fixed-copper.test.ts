@@ -43,16 +43,20 @@ test("shows H616 clear through-via column topology", async (): Promise<void> => 
 
   // This real clear column contains a selected DDR source35 layer transition.
   const column = { x: -6.82, y: 8.94 }
-  const cohorts = solver.topologyMergingSolver!.getOutput().filter(
-    (node) =>
-      Math.abs(column.x - node.center.x) < node.width / 2 - 1e-8 &&
-      Math.abs(column.y - node.center.y) < node.height / 2 - 1e-8,
-  )
+  const cohorts = solver
+    .topologyMergingSolver!.getOutput()
+    .filter(
+      (node) =>
+        Math.abs(column.x - node.center.x) < node.width / 2 - 1e-8 &&
+        Math.abs(column.y - node.center.y) < node.height / 2 - 1e-8,
+    )
   expect(cohorts.length).toBeGreaterThan(0)
   expect(
     cohorts.some(
       (node) =>
-        node._containsObstacle || node._containsTarget || node._isVirtualOffboard,
+        node._containsObstacle ||
+        node._containsTarget ||
+        node._isVirtualOffboard,
     ),
   ).toBeFalse()
   const layers = Array.from({ length: inputSrj.layerCount }, (_, z) => z)
